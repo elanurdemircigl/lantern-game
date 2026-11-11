@@ -1,0 +1,90 @@
+name: Export & Deploy
+
+# "v1.0.0" gibi bir etiket gönderildiğinde: Web + Windows export al,
+# itch.io'ya butler ile yükle ve GitHub Release oluştur.
+# Elle çalıştırıldığında (workflow_dispatch) yalnızca export alır, artifact olarak saklar.
+#
+# Gerekli ayarlar (Settings → Secrets and variables → Actions):
+#   Secret:   BUTLER_API_KEY  (https://itch.io/user/settings/api-keys)
+#   Variable: ITCH_USER       (itch.io kullanıcı adın)
+#   Variable: ITCH_GAME       (oyun sayfasının URL adı, ör. fener)
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.2
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Godot ve export şablonlarını indir
+        run: |
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          wget -q "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          wget -q "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q "Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+          tpl_dir="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$tpl_dir"
+          unzip -q "Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          mv templates/* "$tpl_dir/"
+
+      - name: Projeyi içe aktar
+        run: godot --headless --path . --import
+
+      - name: Export
+        run: |
+          mkdir -p build/web build/windows
+          touch build/.gdignore   # Godot export çıktılarını proje dosyası sanıp içe aktarmasın
+          godot --headless --path . --export-release "Web" build/web/index.html
+          godot --headless --path . --export-release "Windows" build/windows/Fener.exe
+          ls -la build/web build/windows
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web
+          path: build/web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: build/windows
+
+  deploy:
+    needs: export
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Butler'ı kur
+        run: |
+          curl -sL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler
+          chmod +x butler/butler
+          ./butler/butler -V
+
+      - name: itch.io'ya yükle
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_TARGET: ${{ vars.ITCH_USER }}/${{ vars.ITCH_GAME }}
+        run: |
+          ./butler/butler push build/web "$ITCH_TARGET:html5" --userversion "${GITHUB_REF_NAME}"
+          ./butler/butler push build/windows "$ITCH_TARGET:windows" --userversion "${GITHUB_REF_NAME}"
+
+      - name: Windows zip'i hazırla
+        run: cd build/windows && zip -q -r "../../Fener-${GITHUB_REF_NAME}-windows.zip" .
+
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Fener-*-windows.zip
+          generate_release_notes: true

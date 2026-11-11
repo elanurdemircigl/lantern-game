@@ -1,0 +1,17 @@
+# Godot 4 önbelleği ve içe aktarma verileri
+.godot/
+/android/
+
+# Export çıktıları
+/build/
+*.pck
+*.zip
+
+# Gizli export ayarları (şifreler, anahtarlar)
+export_credentials.cfg
+
+# İşletim sistemi / editör
+.DS_Store
+Thumbs.db
+*.tmp
+.vscode/

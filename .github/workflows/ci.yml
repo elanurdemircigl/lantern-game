@@ -1,0 +1,32 @@
+name: CI
+
+# Her push ve PR'da: seviye haritalarını doğrula ve headless duman testini çalıştır.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  GODOT_VERSION: 4.7.2
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Godot'u indir
+        run: |
+          wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q "Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+          godot --version
+
+      - name: Projeyi içe aktar
+        run: godot --headless --path . --import
+
+      - name: Seviyeleri doğrula
+        run: godot --headless --path . --script res://tools/validate_levels.gd
+
+      - name: Duman testi
+        run: timeout 300 godot --headless --path . res://tools/smoke_test.tscn
