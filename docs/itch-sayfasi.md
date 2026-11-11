@@ -25,4 +25,4 @@ bularak çıkış kapısını aç. Ama dikkat et: karanlıkta **gölgeler** dola
 
 **Kontroller:** WASD/Oklar hareket · Boşluk parlama · Esc duraklat · R yeniden başla · Gamepad desteklenir
 
-Godot 4 ile yapıldı. Kaynak kodu GitHub'da: _repo linki_
+Godot 4 ile yapıldı. Kaynak kodu GitHub'da: https://github.com/elanurdemircigl/lantern-game

@@ -6,7 +6,13 @@
 Fenerinin ışığı her saniye azalır; ışık küreleriyle onu besle, karanlıkta dolaşan gölgelerden kaç
 ve tüm kıvılcımları toplayarak çıkış kapısını aç.
 
-**▶ Tarayıcıda oyna:** _itch.io linki yayınlandıktan sonra buraya eklenecek_
+[![itch.io'da oyna](https://img.shields.io/badge/itch.io-Tarayıcıda_oyna-FA5C5C?logo=itchdotio&logoColor=white)](https://elqnur.itch.io/lantern)
+[![CI](https://github.com/elanurdemircigl/lantern-game/actions/workflows/ci.yml/badge.svg)](https://github.com/elanurdemircigl/lantern-game/actions/workflows/ci.yml)
+[![Son sürüm](https://img.shields.io/github/v/release/elanurdemircigl/lantern-game?label=indir)](https://github.com/elanurdemircigl/lantern-game/releases/latest)
+
+**▶ Tarayıcıda oyna:** https://elqnur.itch.io/lantern
+
+**⬇ Windows için indir:** [Son sürüm (GitHub Releases)](https://github.com/elanurdemircigl/lantern-game/releases/latest)
 
 ![Ana menü](docs/screenshots/menu.png)
 
@@ -40,8 +46,8 @@ ve tüm kıvılcımları toplayarak çıkış kapısını aç.
 **Gereksinim:** Godot **4.7.x** (standart sürüm, .NET gerekmez)
 
 ```bash
-git clone <repo-url>
-cd fener
+git clone https://github.com/elanurdemircigl/lantern-game.git
+cd lantern-game
 godot --editor --path .     # Editörde aç
 godot --path .              # Doğrudan oyna
 ```
